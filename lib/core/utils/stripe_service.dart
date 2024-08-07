@@ -1,3 +1,4 @@
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:payment_gateways/Features/checkout/data/models/payment_intent_input_model/payment_intent_model.dart';
 import 'package:payment_gateways/Features/checkout/data/models/payment_intent_model/payment_intent_model.dart';
 import 'package:payment_gateways/core/utils/api_key.dart';
@@ -15,5 +16,16 @@ class StripeService {
     var paymentIntentModel = PaymentIntentModel.fromJson(response.data);
 
     return paymentIntentModel;
+  }
+
+  Future initPaymentSheet(String? paymentIntentClientSecret) async {
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntentClientSecret, merchantDisplayName: 'chihab'),
+    );
+  }
+
+  Future displayPaymentSheet() async {
+    await Stripe.instance.presentPaymentSheet();
   }
 }
