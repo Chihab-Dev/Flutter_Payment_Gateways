@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:payment_gateways/Features/checkout/data/models/ephemeral_key_model/ephemeral_key_model.dart';
+import 'package:payment_gateways/Features/checkout/data/models/init_payment_sheet_input_model/init_payment_sheet_model.dart';
 import 'package:payment_gateways/Features/checkout/data/models/payment_intent_input_model/payment_intent_model.dart';
 import 'package:payment_gateways/Features/checkout/data/models/payment_intent_model/payment_intent_model.dart';
 import 'package:payment_gateways/core/utils/api_key.dart';
@@ -21,17 +22,18 @@ class StripeService {
     return paymentIntentModel;
   }
 
-  Future initPaymentSheet(String? paymentIntentClientSecret) async {
+  Future initPaymentSheet({required InitPaymentSheetInputModel initPyamentSheetInputModel}) async {
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
         // Main params
         merchantDisplayName: 'chihab',
         // • to relate the payment sheet with the customer who made the intent ::
-        paymentIntentClientSecret: paymentIntentClientSecret,
+        paymentIntentClientSecret: initPyamentSheetInputModel.paymentIntentClientSecret,
 
         // Customer params
         // • to check if the customer have previous CARDs then display it ::
-        // customerEphemeralKeySecret: data['ephemeralKey'],
+        customerEphemeralKeySecret: initPyamentSheetInputModel.ephemeralKeySecret,
+        customerId: initPyamentSheetInputModel.customerId,
       ),
     );
   }
@@ -42,7 +44,13 @@ class StripeService {
 
   Future makePayment({required PaymentIntentInputModel paymentIntentInputModel}) async {
     var paymentIntentModel = await createPaymentIntent(paymentIntentInputModel);
-    await initPaymentSheet(paymentIntentModel.clientSecret);
+    var ephemeralKeyModel = await createEphemeralKey(customerId: paymentIntentInputModel.customerId);
+    await initPaymentSheet(
+        initPyamentSheetInputModel: InitPaymentSheetInputModel(
+      paymentIntentClientSecret: paymentIntentModel.clientSecret!,
+      ephemeralKeySecret: ephemeralKeyModel.secret!,
+      customerId: paymentIntentInputModel.customerId,
+    ));
     await displayPaymentSheet();
   }
 
