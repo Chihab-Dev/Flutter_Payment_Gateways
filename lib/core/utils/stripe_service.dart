@@ -23,7 +23,15 @@ class StripeService {
   Future initPaymentSheet(String? paymentIntentClientSecret) async {
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntentClientSecret, merchantDisplayName: 'chihab'),
+        // Main params
+        merchantDisplayName: 'chihab',
+        // • to relate the payment sheet with the customer who made the intent ::
+        paymentIntentClientSecret: paymentIntentClientSecret,
+
+        // Customer params
+        // • to check if the customer have previous CARDs then display it ::
+        // customerEphemeralKeySecret: data['ephemeralKey'],
+      ),
     );
   }
 
@@ -35,5 +43,18 @@ class StripeService {
     var paymentIntentModel = await createPaymentIntent(paymentIntentInputModel);
     await initPaymentSheet(paymentIntentModel.clientSecret);
     await displayPaymentSheet();
+  }
+
+  Future<String> createCustomer() async {
+    var response = await apiService.post(
+      body: "",
+      contentType: Headers.formUrlEncodedContentType,
+      url: 'https://api.stripe.com/v1/customers',
+      token: ApiKey.secretKey,
+    );
+
+    var customerId = response.data['id'];
+
+    return customerId;
   }
 }

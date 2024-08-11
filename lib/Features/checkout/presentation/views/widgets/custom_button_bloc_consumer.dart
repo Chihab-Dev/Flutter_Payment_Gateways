@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:payment_gateways/Features/checkout/data/models/payment_intent_input_model/payment_intent_model.dart';
 import 'package:payment_gateways/Features/checkout/presentation/cubit/payment_cubit.dart';
 import 'package:payment_gateways/Features/checkout/presentation/views/thank_you_view.dart';
+import 'package:payment_gateways/core/utils/api_key.dart';
 import 'package:payment_gateways/core/widgets/custom_button.dart';
 
 class CustomButtonBlocConsumer extends StatelessWidget {
@@ -35,6 +36,7 @@ class CustomButtonBlocConsumer extends StatelessWidget {
             PaymentIntentInputModel paymentIntentInputModel = PaymentIntentInputModel(
               amount: '999',
               currency: 'USD',
+              customerId: ApiKey.customerId,
             );
             BlocProvider.of<PaymentCubit>(context).makePayment(paymentIntentInputModel: paymentIntentInputModel);
           },
