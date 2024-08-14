@@ -1,11 +1,10 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:payment_gateways/Features/checkout/data/models/amount_model/amount_model.dart';
 import 'package:payment_gateways/Features/checkout/data/models/amount_model/details.dart';
 import 'package:payment_gateways/Features/checkout/data/models/item_list_model/item.dart';
 import 'package:payment_gateways/Features/checkout/data/models/item_list_model/item_list_model.dart';
+import 'package:payment_gateways/Features/checkout/data/models/payment_intent_input_model/payment_intent_model.dart';
 import 'package:payment_gateways/Features/checkout/presentation/cubit/payment_cubit.dart';
 import 'package:payment_gateways/Features/checkout/presentation/views/thank_you_view.dart';
 import 'package:payment_gateways/core/utils/api_key.dart';
@@ -38,54 +37,22 @@ class CustomButtonBlocConsumer extends StatelessWidget {
           isLoading: state is PaymentLoading ? true : false,
           text: 'Continue',
           onTap: () {
-            // PaymentIntentInputModel paymentIntentInputModel = PaymentIntentInputModel(
-            //   amount: '999',
-            //   currency: 'USD',
-            //   customerId: ApiKey.customerId,
-            // );
-            // BlocProvider.of<PaymentCubit>(context).makePayment(paymentIntentInputModel: paymentIntentInputModel);
-            var transactionsData = getTransactionData();
-            executePayPalPayment(context, transactionsData);
+            if (BlocProvider.of<PaymentCubit>(context).isPayPal) {
+              // PAYPAL :
+              var transactionsData = getTransactionData();
+              BlocProvider.of<PaymentCubit>(context).executePayPalPayment(context, transactionsData);
+            } else {
+              // STRIPE :
+              PaymentIntentInputModel paymentIntentInputModel = PaymentIntentInputModel(
+                amount: '999',
+                currency: 'USD',
+                customerId: ApiKey.customerId,
+              );
+              BlocProvider.of<PaymentCubit>(context).makePayment(paymentIntentInputModel: paymentIntentInputModel);
+            }
           },
         );
       },
-    );
-  }
-
-  void executePayPalPayment(BuildContext context, ({AmountModel amount, ItemListModel itemList}) transactionsData) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => PaypalCheckoutView(
-          sandboxMode: true,
-          clientId: ApiKey.payPalClientId,
-          secretKey: ApiKey.payPalSecretKey,
-          transactions: [
-            {
-              "amount": transactionsData.amount.toJson(),
-              "description": "The payment transaction description.",
-              "item_list": transactionsData.itemList.toJson(),
-            }
-          ],
-          note: "Contact us for any questions on your order.",
-          onSuccess: (Map params) async {
-            log("onSuccess: $params");
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ThankYouView(),
-              ),
-            );
-          },
-          onError: (error) {
-            log("onError: $error");
-            Navigator.pop(context);
-          },
-          onCancel: () {
-            print('cancelled:');
-            Navigator.pop(context);
-          },
-        ),
-      ),
     );
   }
 
