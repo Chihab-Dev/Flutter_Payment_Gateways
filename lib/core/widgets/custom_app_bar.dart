@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:payment_gateways/core/utils/styles.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:payment_gateways/core/utils/styles.dart';
 
-AppBar buildAppBar({final String? title}) {
+AppBar buildAppBar({final String? title, final bool backArrow = true}) {
   return AppBar(
-    leading: Center(
-      child: SvgPicture.asset(
-        'assets/images/arrow.svg',
-      ),
-    ),
+    leading: backArrow
+        ? Center(
+            child: SvgPicture.asset(
+              'assets/images/arrow.svg',
+            ),
+          )
+        : null,
     elevation: 0,
     backgroundColor: Colors.transparent,
     centerTitle: true,
